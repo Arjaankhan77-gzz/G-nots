@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finish setting up — InsideBox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="brand-row">
+  <svg class="hexmark" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2L21 7V17L12 22L3 17V7L12 2Z" stroke="#3B6FE5" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M12 2V22M3 7L21 17M21 7L3 17" stroke="#3B6FE5" stroke-width="1.4"/>
+  </svg>
+  <span class="brand-name">InsideBox</span>
+</div>
+
+<div class="center-wrap">
+  <div class="card">
+    <p class="eyebrow">One last step</p>
+    <h1 class="heading">Finish setting up</h1>
+
+    <div id="banner"></div>
+
+    <div class="field">
+      <label for="firstName">First name</label>
+      <input id="firstName" type="text" required placeholder="First name">
+    </div>
+    <div class="field">
+      <label for="lastName">Last name</label>
+      <input id="lastName" type="text" required placeholder="Last name">
+    </div>
+    <div class="field">
+      <label for="username">Username</label>
+      <input id="username" type="text" required placeholder="e.g. Axyz.22" autocomplete="off">
+      <div class="username-status" id="usernameStatus"></div>
+    </div>
+    <button class="btn btn-primary" id="submitBtn">Continue</button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="firebase-init.js"></script>
+<script src="common.js"></script>
+<script>
+const banner=document.getElementById('banner');
+function showBanner(msg, kind){ banner.innerHTML = `<div class="banner banner-${kind}">${escapeHtml(msg)}</div>`; }
+
+auth.onAuthStateChanged(user=>{ if(!user) window.location.href='index.html'; });
+
+let usernameCheckTimer=null;
+document.getElementById('username').addEventListener('input', (e)=>{
+  const val = e.target.value.trim();
+  const status = document.getElementById('usernameStatus');
+  clearTimeout(usernameCheckTimer);
+  if(!val){ status.textContent=''; return; }
+  status.textContent='Checking...'; status.className='username-status checking';
+  usernameCheckTimer = setTimeout(async ()=>{
+    const free = await isUsernameAvailable(val);
+    if(e.target.value.trim() !== val) return;
+    if(free){ status.textContent='Available'; status.className='username-status ok'; }
+    else{ status.textContent='That name is already taken — try another.'; status.className='username-status taken'; }
+  }, 400);
+});
+
+document.getElementById('submitBtn').addEventListener('click', async ()=>{
+  banner.innerHTML='';
+  const firstName = document.getElementById('firstName').value.trim();
+  const lastName = document.getElementById('lastName').value.trim();
+  const username = document.getElementById('username').value.trim();
+  if(!firstName || !lastName || !username){ showBanner('Fill in all fields.', 'error'); return; }
+
+  const btn=document.getElementById('submitBtn');
+  btn.disabled=true; btn.textContent='Saving...';
+  try{
+    const free = await isUsernameAvailable(username);
+    if(!free){
+      showBanner('That username is already taken — try another.', 'error');
+      btn.disabled=false; btn.textContent='Continue';
+      return;
+    }
+    const user = auth.currentUser;
+    await reserveUsername(username, user.uid, user.email);
+    await db.collection('users').doc(user.uid).set({
+      firstName, lastName, username, email: user.email,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    window.location.href = 'dashboard.html';
+  }catch(err){
+    showBanner('Something went wrong: ' + err.message, 'error');
+    btn.disabled=false; btn.textContent='Continue';
+  }
+});
+</script>
+</body>
+</html>

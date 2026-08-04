@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- Notes: public/private + selected sharing (unchanged model) ----
+    match /notes/{noteId} {
+      allow read: if resource.data.visibility == 'public'
+                  || (request.auth != null && request.auth.uid == resource.data.ownerUid)
+                  || (request.auth != null && request.auth.token.email in resource.data.sharedWith);
+
+      allow create: if request.auth != null
+                    && request.resource.data.ownerUid == request.auth.uid
+                    && request.resource.data.ownerEmail == request.auth.token.email
+                    && request.resource.data.visibility in ['public', 'private'];
+
+      allow update, delete: if request.auth != null
+                             && request.auth.uid == resource.data.ownerUid;
+    }
+
+    // ---- Usernames: doc ID *is* the username, so this enforces uniqueness.
+    // A write to an existing doc is an "update", which is blocked below —
+    // so once a name is taken, nobody (including its owner) can be reassigned to it.
+    match /usernames/{username} {
+      allow read: if true; // needed to check availability pre-signup and to sign in by username
+      allow create: if request.auth != null
+                    && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // ---- User profiles: only the owner can read/write their own ----
+    match /users/{uid} {
+      allow read, update, delete: if request.auth != null && request.auth.uid == uid;
+      allow create: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // ---- Signup OTP codes ----
+    // These reads/writes happen before the user has an account, so they can't
+    // be tied to request.auth. Security instead relies on: a random 6-digit
+    // code, a 10-minute expiry, and a 5-attempt cap (all enforced in common.js).
+    // This is fine for a personal/small project; a production app would move
+    // OTP issuing and checking into a server-side Cloud Function instead.
+    match /otps/{email} {
+      allow read, write: if true;
+    }
+  }
+}

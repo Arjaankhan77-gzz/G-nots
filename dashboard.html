@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catalog — your notes, shared on your terms</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink-bg: #1B1F2A;
+    --ink-bg-2: #222739;
+    --paper: #F6F1E4;
+    --paper-dim: #ECE5D2;
+    --text-ink: #23201B;
+    --text-dim: #8A8F9C;
+    --mustard: #D8A438;
+    --teal: #3E7C74;
+    --danger: #B3543F;
+    --line: rgba(246,241,228,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--ink-bg);color:var(--paper);font-family:'Inter',sans-serif;min-height:100vh;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .display{font-family:'Fraunces',serif;}
+  a{color:inherit;}
+
+  /* ---- top bar ---- */
+  header{display:flex;align-items:center;justify-content:space-between;padding:20px 32px;border-bottom:1px solid var(--line);}
+  .brand{display:flex;align-items:baseline;gap:10px;}
+  .brand .mark{font-family:'Fraunces',serif;font-weight:700;font-size:22px;letter-spacing:-0.02em;}
+  .brand .tag{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.12em;}
+  .who{display:flex;align-items:center;gap:14px;font-size:13px;color:var(--text-dim);}
+  .who button{background:transparent;border:1px solid var(--line);color:var(--paper);padding:7px 14px;border-radius:3px;cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;}
+  .who button:hover{border-color:var(--mustard);color:var(--mustard);}
+
+  /* ---- auth screen ---- */
+  .auth-wrap{min-height:calc(100vh - 73px);display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+  .card{background:var(--paper);color:var(--text-ink);border-radius:2px;width:100%;max-width:400px;padding:36px 34px;position:relative;box-shadow:0 30px 60px rgba(0,0,0,0.35);}
+  .card::before{content:'';position:absolute;top:0;left:28px;width:2px;height:100%;background:repeating-linear-gradient(to bottom, transparent 0 6px, rgba(0,0,0,0.08) 6px 7px);}
+  .card h1{font-family:'Fraunces',serif;font-size:26px;margin:0 0 4px;font-weight:600;}
+  .card p.sub{margin:0 0 26px;color:#6b6558;font-size:13px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#7a7364;margin-bottom:6px;}
+  .field input{width:100%;padding:10px 12px;border:1px solid #d8d0b8;background:#fffdf7;border-radius:2px;font-size:14px;font-family:'Inter',sans-serif;}
+  .field input:focus{outline:2px solid var(--teal);outline-offset:0;}
+  .primary-btn{width:100%;padding:11px;background:var(--text-ink);color:var(--paper);border:none;border-radius:2px;font-size:14px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:500;margin-top:6px;}
+  .primary-btn:hover{background:var(--teal);}
+  .switch{margin-top:16px;font-size:13px;text-align:center;color:#6b6558;}
+  .switch button{background:none;border:none;color:var(--teal);text-decoration:underline;cursor:pointer;font-size:13px;padding:0;font-family:'Inter',sans-serif;}
+  .auth-error{background:#fbe9e5;border:1px solid var(--danger);color:#7c3323;padding:9px 12px;border-radius:2px;font-size:12.5px;margin-bottom:14px;}
+
+  /* ---- app layout ---- */
+  .app{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 73px);}
+  nav.side{border-right:1px solid var(--line);padding:26px 22px;}
+  .side h2{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--text-dim);margin:0 0 14px;}
+  .side .tab{display:block;width:100%;text-align:left;background:none;border:none;color:var(--paper);opacity:.7;padding:9px 10px;border-radius:3px;cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;margin-bottom:2px;}
+  .side .tab.active{opacity:1;background:var(--ink-bg-2);}
+  .side .tab:hover{opacity:1;}
+  .new-note-btn{width:100%;margin-top:20px;padding:10px;background:var(--mustard);color:#241c05;border:none;border-radius:3px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;font-size:13.5px;}
+  .new-note-btn:hover{filter:brightness(1.08);}
+
+  main{padding:30px 36px;overflow-y:auto;}
+  .board-title{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;}
+  .board-sub{color:var(--text-dim);font-size:13px;margin:0 0 24px;}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;}
+  .note-card{background:var(--paper);color:var(--text-ink);border-radius:2px;padding:18px 18px 14px;position:relative;cursor:pointer;transition:transform .12s ease;min-height:150px;display:flex;flex-direction:column;}
+  .note-card:hover{transform:translateY(-2px);}
+  .tab-mark{position:absolute;top:0;right:16px;width:26px;height:12px;border-radius:0 0 3px 3px;}
+  .tab-mark.public{background:var(--mustard);}
+  .tab-mark.private{background:var(--teal);}
+  .note-card h3{font-family:'Fraunces',serif;font-size:16.5px;margin:6px 0 8px;line-height:1.3;}
+  .note-card .snippet{font-size:13px;color:#5b564a;line-height:1.5;flex:1;overflow:hidden;}
+  .note-card .meta{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:10.5px;color:#8a8371;border-top:1px dashed #d8d0b8;padding-top:8px;}
+  .empty{color:var(--text-dim);font-size:14px;padding:40px 0;text-align:center;border:1px dashed var(--line);border-radius:4px;}
+
+  /* ---- modal ---- */
+  .modal-bg{position:fixed;inset:0;background:rgba(10,12,18,0.6);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50;}
+  .modal{background:var(--paper);color:var(--text-ink);width:100%;max-width:560px;border-radius:2px;padding:30px 32px;max-height:88vh;overflow-y:auto;}
+  .modal h2{font-family:'Fraunces',serif;font-size:22px;margin:0 0 18px;}
+  .modal textarea{width:100%;min-height:160px;padding:12px;border:1px solid #d8d0b8;background:#fffdf7;border-radius:2px;font-family:'Inter',sans-serif;font-size:14px;resize:vertical;}
+  .modal input[type=text]{width:100%;padding:10px 12px;border:1px solid #d8d0b8;background:#fffdf7;border-radius:2px;font-size:15px;font-family:'Fraunces',serif;margin-bottom:14px;}
+  .vis-row{display:flex;gap:10px;margin:16px 0;}
+  .vis-opt{flex:1;border:1px solid #d8d0b8;padding:12px;border-radius:3px;cursor:pointer;text-align:center;font-size:13px;}
+  .vis-opt.selected.public{border-color:var(--mustard);background:#fbf1dc;}
+  .vis-opt.selected.private{border-color:var(--teal);background:#e6f0ee;}
+  .share-emails{display:none;margin-top:10px;}
+  .share-emails.show{display:block;}
+  .chip-input{display:flex;gap:8px;}
+  .chip-input input{flex:1;padding:9px 10px;border:1px solid #d8d0b8;border-radius:2px;font-size:13px;}
+  .chip-input button{padding:9px 12px;border:1px solid var(--text-ink);background:none;border-radius:2px;cursor:pointer;font-size:13px;}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+  .chip{background:#e6e0cc;padding:5px 10px;border-radius:12px;font-size:12px;display:flex;align-items:center;gap:6px;}
+  .chip button{background:none;border:none;cursor:pointer;color:#7c3323;font-weight:700;padding:0;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;}
+  .btn-ghost{background:none;border:1px solid #d8d0b8;padding:9px 16px;border-radius:2px;cursor:pointer;font-family:'Inter',sans-serif;font-size:13.5px;}
+  .btn-danger{background:none;border:1px solid var(--danger);color:var(--danger);padding:9px 16px;border-radius:2px;cursor:pointer;font-family:'Inter',sans-serif;font-size:13.5px;margin-right:auto;}
+
+  .view-body{white-space:pre-wrap;font-size:14.5px;line-height:1.6;margin-top:6px;}
+  .view-meta{font-size:12px;color:#7a7364;margin-top:18px;padding-top:12px;border-top:1px dashed #d8d0b8;}
+
+  @media (max-width: 760px){
+    .app{grid-template-columns:1fr;}
+    nav.side{border-right:none;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:16px 20px;}
+    .side h2{display:none;}
+    .new-note-btn{width:auto;margin-top:0;margin-left:auto;}
+  }
+  :focus-visible{outline:2px solid var(--mustard);outline-offset:2px;}
+  @media (prefers-reduced-motion: reduce){ *{transition:none !important;} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="mark">Catalog</span>
+    <span class="tag">notes, filed and shared</span>
+  </div>
+  <div class="who" id="whoBar"></div>
+</header>
+
+<div id="appScreen" class="app" style="display:none;">
+  <nav class="side">
+    <h2>Shelves</h2>
+    <button class="tab active" data-tab="mine">My notes</button>
+    <button class="tab" data-tab="shared">Shared with me</button>
+    <button class="tab" data-tab="public">Public board</button>
+    <button class="new-note-btn" id="newNoteBtn">+ New note</button>
+  </nav>
+  <main>
+    <h1 class="board-title" id="boardTitle">My notes</h1>
+    <p class="board-sub" id="boardSub">Everything you've filed.</p>
+    <div class="grid" id="noteGrid"></div>
+  </main>
+</div>
+
+<!-- Editor modal -->
+<div class="modal-bg" id="editorBg" style="display:none;">
+  <div class="modal">
+    <h2 id="editorHeading">New note</h2>
+    <input type="text" id="titleInput" placeholder="Title">
+    <textarea id="bodyInput" placeholder="Write it down..."></textarea>
+    <div class="vis-row">
+      <div class="vis-opt public" data-vis="public" id="visPublicOpt">
+        <strong>Public</strong><br><span class="mono" style="font-size:11px;">anyone can read it</span>
+      </div>
+      <div class="vis-opt private selected" data-vis="private" id="visPrivateOpt">
+        <strong>Private</strong><br><span class="mono" style="font-size:11px;">only people you pick</span>
+      </div>
+    </div>
+    <div class="share-emails show" id="shareBlock">
+      <label style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#7a7364;">Share with (email)</label>
+      <div class="chip-input" style="margin-top:6px;">
+        <input type="email" id="shareEmailInput" placeholder="someone@example.com">
+        <button type="button" id="addShareBtn">Add</button>
+      </div>
+      <div class="chips" id="shareChips"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-danger" id="deleteNoteBtn" style="display:none;">Delete</button>
+      <button class="btn-ghost" id="cancelEditBtn">Cancel</button>
+      <button class="primary-btn" id="saveNoteBtn" style="width:auto;padding:10px 20px;">Publish</button>
+    </div>
+  </div>
+</div>
+
+<!-- View modal -->
+<div class="modal-bg" id="viewBg" style="display:none;">
+  <div class="modal">
+    <h2 id="viewTitle" class="display"></h2>
+    <div class="view-body" id="viewBody"></div>
+    <div class="view-meta mono" id="viewMeta"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="closeViewBtn">Close</button>
+      <button class="primary-btn" id="editFromViewBtn" style="width:auto;padding:9px 18px;display:none;">Edit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Shared Firebase config lives in firebase-init.js — see README.md for setup. -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script>
+const appScreen=document.getElementById('appScreen');
+let currentUser = null;
+let activeTab = 'mine';
+let currentEditId = null;
+let shareList = [];
+let unsub = null;
+
+auth.onAuthStateChanged(async user=>{
+  currentUser = user;
+  if(user){
+    appScreen.style.display='grid';
+    let label = user.email;
+    try{
+      const profile = await db.collection('users').doc(user.uid).get();
+      if(profile.exists) label = '@' + profile.data().username;
+    }catch(e){}
+    document.getElementById('whoBar').innerHTML =
+      `<span class="mono">${escapeHtml(label)}</span><button id="signOutBtn">Sign out</button>`;
+    document.getElementById('signOutBtn').addEventListener('click', ()=>auth.signOut());
+    loadTab('mine');
+  } else {
+    if(unsub){ unsub(); unsub=null; }
+    window.location.href = 'index.html';
+  }
+});
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    loadTab(btn.dataset.tab);
+  });
+});
+
+const titles = {
+  mine: ['My notes', "Everything you've filed."],
+  shared: ['Shared with me', 'Private notes someone chose to show you.'],
+  public: ['Public board', 'Open to anyone who visits this site.']
+};
+
+function loadTab(tab){
+  activeTab = tab;
+  document.getElementById('boardTitle').textContent = titles[tab][0];
+  document.getElementById('boardSub').textContent = titles[tab][1];
+  if(unsub){ unsub(); unsub=null; }
+
+  let query;
+  if(tab==='mine'){
+    query = db.collection('notes').where('ownerUid','==',currentUser.uid);
+  } else if(tab==='shared'){
+    query = db.collection('notes').where('sharedWith','array-contains',currentUser.email);
+  } else {
+    query = db.collection('notes').where('visibility','==','public');
+  }
+
+  unsub = query.onSnapshot(snap=>{
+    const notes=[];
+    snap.forEach(doc=>notes.push({id:doc.id,...doc.data()}));
+    notes.sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));
+    renderGrid(notes);
+  }, err=>{
+    document.getElementById('noteGrid').innerHTML = `<div class="empty">Couldn't load notes: ${escapeHtml(err.message)}</div>`;
+  });
+}
+
+function renderGrid(notes){
+  const grid=document.getElementById('noteGrid');
+  if(notes.length===0){
+    grid.innerHTML = `<div class="empty">Nothing here yet.</div>`;
+    return;
+  }
+  grid.innerHTML = notes.map(n=>`
+    <div class="note-card" data-id="${n.id}">
+      <div class="tab-mark ${n.visibility}"></div>
+      <h3>${escapeHtml(n.title||'Untitled')}</h3>
+      <div class="snippet">${escapeHtml((n.content||'').slice(0,140))}</div>
+      <div class="meta">
+        <span>${escapeHtml(n.ownerEmail||'')}</span>
+        <span>${n.visibility}</span>
+      </div>
+    </div>
+  `).join('');
+  grid.querySelectorAll('.note-card').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      const note = notes.find(n=>n.id===card.dataset.id);
+      openView(note);
+    });
+  });
+}
+
+/* ---------- View modal ---------- */
+const viewBg=document.getElementById('viewBg');
+function openView(note){
+  document.getElementById('viewTitle').textContent = note.title || 'Untitled';
+  document.getElementById('viewBody').textContent = note.content || '';
+  const shared = note.visibility==='private' ? ` · shared with ${(note.sharedWith||[]).join(', ')||'no one yet'}` : '';
+  document.getElementById('viewMeta').textContent =
+    `${note.ownerEmail} · ${note.visibility}${shared}`;
+  const editBtn = document.getElementById('editFromViewBtn');
+  if(note.ownerUid===currentUser.uid){
+    editBtn.style.display='inline-block';
+    editBtn.onclick = ()=>{ viewBg.style.display='none'; openEditor(note); };
+  } else {
+    editBtn.style.display='none';
+  }
+  viewBg.style.display='flex';
+}
+document.getElementById('closeViewBtn').addEventListener('click', ()=>viewBg.style.display='none');
+
+/* ---------- Editor modal ---------- */
+const editorBg=document.getElementById('editorBg');
+const visPublicOpt=document.getElementById('visPublicOpt'), visPrivateOpt=document.getElementById('visPrivateOpt');
+const shareBlock=document.getElementById('shareBlock');
+let currentVis='private';
+
+function setVis(v){
+  currentVis=v;
+  visPublicOpt.classList.toggle('selected', v==='public');
+  visPrivateOpt.classList.toggle('selected', v==='private');
+  shareBlock.classList.toggle('show', v==='private');
+}
+visPublicOpt.addEventListener('click', ()=>setVis('public'));
+visPrivateOpt.addEventListener('click', ()=>setVis('private'));
+
+document.getElementById('newNoteBtn').addEventListener('click', ()=>openEditor(null));
+
+function openEditor(note){
+  currentEditId = note ? note.id : null;
+  document.getElementById('editorHeading').textContent = note ? 'Edit note' : 'New note';
+  document.getElementById('titleInput').value = note ? note.title : '';
+  document.getElementById('bodyInput').value = note ? note.content : '';
+  shareList = note && note.sharedWith ? [...note.sharedWith] : [];
+  setVis(note ? note.visibility : 'private');
+  renderChips();
+  document.getElementById('deleteNoteBtn').style.display = note ? 'inline-block' : 'none';
+  document.getElementById('saveNoteBtn').textContent = note ? 'Save changes' : 'Publish';
+  editorBg.style.display='flex';
+}
+document.getElementById('cancelEditBtn').addEventListener('click', ()=>editorBg.style.display='none');
+
+function renderChips(){
+  const box=document.getElementById('shareChips');
+  box.innerHTML = shareList.map(email=>`
+    <span class="chip">${escapeHtml(email)} <button data-email="${escapeHtml(email)}">&times;</button></span>
+  `).join('');
+  box.querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      shareList = shareList.filter(e=>e!==b.dataset.email);
+      renderChips();
+    });
+  });
+}
+document.getElementById('addShareBtn').addEventListener('click', ()=>{
+  const input=document.getElementById('shareEmailInput');
+  const email=input.value.trim().toLowerCase();
+  if(email && !shareList.includes(email)){
+    shareList.push(email);
+    renderChips();
+  }
+  input.value='';
+});
+
+document.getElementById('saveNoteBtn').addEventListener('click', async ()=>{
+  const title=document.getElementById('titleInput').value.trim();
+  const content=document.getElementById('bodyInput').value.trim();
+  if(!title || !content){ alert('Give it a title and some content first.'); return; }
+  const payload = {
+    title, content,
+    visibility: currentVis,
+    sharedWith: currentVis==='private' ? shareList : [],
+    ownerUid: currentUser.uid,
+    ownerEmail: currentUser.email,
+  };
+  try{
+    if(currentEditId){
+      await db.collection('notes').doc(currentEditId).update(payload);
+    } else {
+      payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      await db.collection('notes').add(payload);
+    }
+    editorBg.style.display='none';
+  }catch(err){
+    alert('Could not save: ' + err.message);
+  }
+});
+
+document.getElementById('deleteNoteBtn').addEventListener('click', async ()=>{
+  if(!currentEditId) return;
+  if(!confirm('Delete this note for good?')) return;
+  try{
+    await db.collection('notes').doc(currentEditId).delete();
+    editorBg.style.display='none';
+  }catch(err){
+    alert('Could not delete: ' + err.message);
+  }
+});
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
+</script>
+</body>
+</html>
