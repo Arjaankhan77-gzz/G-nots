@@ -4,12 +4,13 @@
    2. EmailJS account: used to send the 6-digit signup code by email
    ===================================================================== */
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyA0T9IRFRDgaM0XLB30IgcYBM3UGxGhnj0",
+  authDomain: "g-note-c02d9.firebaseapp.com",
+  projectId: "g-note-c02d9",
+  storageBucket: "g-note-c02d9.firebasestorage.app",
+  messagingSenderId: "514150256929",
+  appId: "1:514150256929:web:bb0606d31ed17ddafe6e60",
+  measurementId: "G-KYPHE8TC6T"
 };
 
 const emailjsConfig = {
