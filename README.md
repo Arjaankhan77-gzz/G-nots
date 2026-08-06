@@ -31,7 +31,16 @@ Both have generous free tiers and need no credit card.
 1. https://console.firebase.google.com → **Add project**.
 2. **Build → Authentication → Get started.**
    - Enable the **Email/Password** provider.
-   - Also enable **Google** as a provider (for the "Sign in with Google" button) — just toggle it on and save, no extra config needed for a basic setup.
+   - Also enable **Google** as a provider (for the "Sign in with Google" button) — just toggle it on and save.
+
+### If "Sign in with Google" opens a blank popup that closes itself
+
+This means the site's actual domain hasn't been approved yet:
+- **Authentication → Settings → Authorized domains** in the Firebase console.
+- Add your GitHub Pages domain there, e.g. `yourusername.github.io`.
+- While testing locally, `localhost` is usually already on the list by default.
+The button now shows a real error message explaining which of these is
+missing, instead of just failing silently.
 3. **Build → Firestore Database → Create database** → start in **production mode**.
 4. ⚙ **Project settings** → scroll to "Your apps" → click **</>** to register a web app → copy the `firebaseConfig` object it shows you.
 5. Paste those values into `firebase-init.js`, replacing the `YOUR_...` placeholders.
