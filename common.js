@@ -2,6 +2,20 @@ function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
 }
 
+/* Wires up every "show/hide password" eye button on the page.
+   Expected markup: <button class="toggle-eye" data-target="someInputId">...</button> */
+function wirePasswordToggles(){
+  document.querySelectorAll('.toggle-eye[data-target]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const input = document.getElementById(btn.dataset.target);
+      if(!input) return;
+      const showing = input.type === 'text';
+      input.type = showing ? 'password' : 'text';
+      btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+    });
+  });
+}
+
 function genOtp(){
   return String(Math.floor(100000 + Math.random()*900000));
 }

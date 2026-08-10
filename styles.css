@@ -74,6 +74,11 @@ body{
 .field-icon{position:relative;}
 .field-icon svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);pointer-events:none;}
 .field-icon input{padding-left:38px !important;}
+.field-icon input.has-toggle{padding-right:40px !important;}
+/* Kill the browser's own built-in password-reveal icon (Edge/IE) so it doesn't
+   sit on top of our custom eye button and cause confusing double-clicks. */
+input[type=password]::-ms-reveal,
+input[type=password]::-ms-clear{ display:none; width:0; height:0; }
 .field input{
   width:100%;padding:12px 13px;border:1px solid var(--border);border-radius:8px;
   font-size:14px;font-family:inherit;background:#fff;color:var(--text);
@@ -81,7 +86,8 @@ body{
 .field input::placeholder{color:#B3ADC2;}
 .field input:focus{outline:none;border-color:var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,0.14);}
 .field-error{font-size:12px;color:var(--danger);margin-top:5px;}
-.toggle-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:2px;color:#9A93AC;}
+.toggle-eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:6px;color:#9A93AC;z-index:2;}
+.toggle-eye svg{position:static;}
 .toggle-eye:hover{color:var(--text);}
 
 .row-between{display:flex;align-items:center;justify-content:space-between;margin:10px 0 20px;font-size:13px;}

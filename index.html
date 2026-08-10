@@ -45,9 +45,9 @@
           <label for="loginPass">Password</label>
           <div class="field-icon">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="#9A93AC" stroke-width="1.3"/><path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="#9A93AC" stroke-width="1.3"/></svg>
-            <input id="loginPass" type="password" required placeholder="Password" autocomplete="current-password">
-            <button type="button" class="toggle-eye" id="togglePass" aria-label="Show password">
-              <svg id="eyeIcon" width="17" height="17" viewBox="0 0 16 16" fill="none"><path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.3"/></svg>
+            <input id="loginPass" class="has-toggle" type="password" required placeholder="Password" autocomplete="current-password">
+            <button type="button" class="toggle-eye" data-target="loginPass" aria-label="Show password">
+              <svg width="17" height="17" viewBox="0 0 16 16" fill="none"><path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.3"/></svg>
             </button>
           </div>
         </div>
@@ -60,13 +60,6 @@
         <button type="submit" class="btn btn-primary" id="submitBtn">Sign in</button>
       </form>
 
-      <div class="or-divider">or</div>
-
-      <button class="btn btn-google" id="googleBtn">
-        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.95v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.72A5.4 5.4 0 0 1 3.68 9c0-.6.1-1.18.29-1.72V4.95H.95A9 9 0 0 0 0 9c0 1.45.35 2.83.95 4.05l3.02-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .95 4.95l3.02 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
-        Sign in with Google
-      </button>
-
       <p class="divider-note">Don't have an account? <a class="link" href="signup.html">Sign up</a></p>
     </div>
   </div>
@@ -76,18 +69,14 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-init.js"></script>
+<script src="common.js"></script>
 <script>
 const banner=document.getElementById('banner');
 function showBanner(msg, kind){
   banner.innerHTML = `<div class="banner banner-${kind}">${escapeHtml(msg)}</div>`;
 }
-function escapeHtml(str){return String(str).replace(/[&<>"']/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));}
 
-document.getElementById('togglePass').addEventListener('click', ()=>{
-  const input = document.getElementById('loginPass');
-  const showing = input.type === 'text';
-  input.type = showing ? 'password' : 'text';
-});
+wirePasswordToggles();
 
 // If already signed in, skip straight to the dashboard.
 auth.onAuthStateChanged(user=>{ if(user) window.location.href='dashboard.html'; });
@@ -123,29 +112,11 @@ document.getElementById('loginForm').addEventListener('submit', async (e)=>{
   }
 });
 
-document.getElementById('googleBtn').addEventListener('click', async ()=>{
-  banner.innerHTML='';
-  const btn = document.getElementById('googleBtn');
-  btn.disabled = true;
-  try{
-    const provider = new firebase.auth.GoogleAuthProvider();
-    const result = await auth.signInWithPopup(provider);
-    const userDoc = await db.collection('users').doc(result.user.uid).get();
-    window.location.href = userDoc.exists ? 'dashboard.html' : 'complete-profile.html';
-  }catch(err){
-    showBanner(friendlyError(err), 'error');
-    btn.disabled = false;
-  }
-});
-
 function friendlyError(err){
   const c = err.code || '';
-  if(c.includes('unauthorized-domain')) return "This website's address isn't approved for Google sign-in yet. In Firebase Console → Authentication → Settings → Authorized domains, add this site's domain, then try again.";
-  if(c.includes('operation-not-allowed')) return 'Google sign-in isn\'t turned on yet. In Firebase Console → Authentication → Sign-in method, enable the Google provider.';
-  if(c.includes('popup-blocked')) return 'Your browser blocked the sign-in popup — allow popups for this site and try again.';
-  if(c.includes('popup-closed-by-user') || c.includes('cancelled-popup-request')) return 'The Google sign-in window was closed before finishing — try again.';
+  if(c.includes('unauthorized-domain')) return "This website's address isn't approved yet. In Firebase Console → Authentication → Settings → Authorized domains, add this site's domain.";
   if(c.includes('api-key') || c.includes('invalid-api-key')) return 'The site\'s Firebase keys aren\'t set up yet (still placeholders in firebase-init.js).';
-  if(c.includes('wrong-password') || c.includes('invalid-credential')) return 'Wrong email/username or password.';
+  if(c.includes('wrong-password') || c.includes('invalid-credential')) return 'Wrong username/email or password.';
   if(c.includes('user-not-found')) return 'No account with that email — try signing up.';
   if(c.includes('too-many-requests')) return 'Too many attempts. Try again in a bit.';
   return 'Something went wrong: ' + (err.message || c);

@@ -20,12 +20,12 @@
 
 <div class="center-wrap">
   <div class="card">
-    <div class="steps"><span id="s1" class="done"></span><span id="s2"></span><span id="s3"></span></div>
+    <div class="steps"><span id="s1" class="done"></span><span id="s2"></span></div>
     <div id="banner"></div>
 
     <!-- Step 1: email + password -->
     <div id="step1">
-      <p class="eyebrow">Step 1 of 3</p>
+      <p class="eyebrow">Step 1 of 2</p>
       <h1 class="heading">Create your account</h1>
       <div class="field">
         <label for="suEmail">Email address</label>
@@ -33,32 +33,21 @@
       </div>
       <div class="field">
         <label for="suPass">Password</label>
-        <input id="suPass" type="password" required minlength="6" placeholder="At least 6 characters" autocomplete="new-password">
+        <div class="field-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="#9A93AC" stroke-width="1.3"/><path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="#9A93AC" stroke-width="1.3"/></svg>
+          <input id="suPass" class="has-toggle" type="password" required minlength="6" placeholder="At least 6 characters" autocomplete="new-password">
+          <button type="button" class="toggle-eye" data-target="suPass" aria-label="Show password">
+            <svg width="17" height="17" viewBox="0 0 16 16" fill="none"><path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.3"/></svg>
+          </button>
+        </div>
       </div>
-      <button class="btn btn-primary" id="step1Btn">Send verification code</button>
+      <button class="btn btn-primary" id="step1Btn">Continue</button>
       <p class="divider-note">Already have an account? <a class="link" href="index.html">Sign in</a></p>
     </div>
 
-    <!-- Step 2: OTP -->
+    <!-- Step 2: profile -->
     <div id="step2" style="display:none;">
-      <p class="eyebrow">Step 2 of 3</p>
-      <h1 class="heading">Check your email</h1>
-      <p style="font-size:13.5px;color:var(--text-dim);margin-top:-14px;">
-        We sent a 6-digit code to <strong id="otpEmailShown"></strong>.
-      </p>
-      <div class="field">
-        <label for="otpInput">Verification code</label>
-        <div class="otp-row"><input id="otpInput" type="text" inputmode="numeric" maxlength="6" placeholder="000000"></div>
-      </div>
-      <button class="btn btn-primary" id="step2Btn">Verify code</button>
-      <div class="resend-row">
-        Didn't get it? <button type="button" id="resendBtn">Resend code</button>
-      </div>
-    </div>
-
-    <!-- Step 3: profile -->
-    <div id="step3" style="display:none;">
-      <p class="eyebrow">Step 3 of 3</p>
+      <p class="eyebrow">Step 2 of 2</p>
       <h1 class="heading">Finish setting up</h1>
       <div class="field">
         <label for="firstName">First name</label>
@@ -75,9 +64,15 @@
       </div>
       <div class="field">
         <label for="confirmPass">Confirm password</label>
-        <input id="confirmPass" type="password" required placeholder="Re-enter your password" autocomplete="new-password">
+        <div class="field-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="#9A93AC" stroke-width="1.3"/><path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="#9A93AC" stroke-width="1.3"/></svg>
+          <input id="confirmPass" class="has-toggle" type="password" required placeholder="Re-enter your password" autocomplete="new-password">
+          <button type="button" class="toggle-eye" data-target="confirmPass" aria-label="Show password">
+            <svg width="17" height="17" viewBox="0 0 16 16" fill="none"><path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.3"/></svg>
+          </button>
+        </div>
       </div>
-      <button class="btn btn-primary" id="step3Btn">Create account</button>
+      <button class="btn btn-primary" id="step2Btn">Create account</button>
     </div>
   </div>
 </div>
@@ -85,7 +80,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="firebase-init.js"></script>
 <script src="common.js"></script>
 <script>
@@ -95,15 +89,14 @@ function clearBanner(){ banner.innerHTML=''; }
 function setStep(n){
   document.getElementById('step1').style.display = n===1 ? 'block':'none';
   document.getElementById('step2').style.display = n===2 ? 'block':'none';
-  document.getElementById('step3').style.display = n===3 ? 'block':'none';
   document.getElementById('s1').classList.toggle('done', n>=1);
   document.getElementById('s2').classList.toggle('done', n>=2);
-  document.getElementById('s3').classList.toggle('done', n>=3);
 }
+wirePasswordToggles();
 
 let pendingEmail='', pendingPass='';
 
-/* ---- Step 1 ---- */
+/* ---- Step 1: create the account directly ---- */
 document.getElementById('step1Btn').addEventListener('click', async ()=>{
   clearBanner();
   const email = document.getElementById('suEmail').value.trim();
@@ -111,38 +104,11 @@ document.getElementById('step1Btn').addEventListener('click', async ()=>{
   if(!email || pass.length<6){ showBanner('Enter a valid email and a password of at least 6 characters.', 'error'); return; }
 
   const btn=document.getElementById('step1Btn');
-  btn.disabled=true; btn.textContent='Sending...';
+  btn.disabled=true; btn.textContent='Creating...';
   try{
-    // Firebase itself will reject at final account-creation time if this email is
-    // already registered — we surface that then, to avoid leaking account existence here.
+    await auth.createUserWithEmailAndPassword(email, pass);
     pendingEmail = email; pendingPass = pass;
-    await requestOtp(email, 'signup');
-    document.getElementById('otpEmailShown').textContent = email;
     setStep(2);
-  }catch(err){
-    showBanner('Could not send the code: ' + err.message, 'error');
-  }finally{
-    btn.disabled=false; btn.textContent='Send verification code';
-  }
-});
-
-/* ---- Step 2 ---- */
-document.getElementById('step2Btn').addEventListener('click', async ()=>{
-  clearBanner();
-  const code = document.getElementById('otpInput').value.trim();
-  if(code.length!==6){ showBanner('Enter the 6-digit code.', 'error'); return; }
-  const btn=document.getElementById('step2Btn');
-  btn.disabled=true; btn.textContent='Verifying...';
-  try{
-    const result = await checkOtp(pendingEmail, 'signup', code);
-    if(!result.ok){
-      const msgs = {wrong:'That code is wrong.', expired:'That code expired — resend a new one.', too_many:'Too many wrong tries — resend a new code.', none:'Request a code first.'};
-      showBanner(msgs[result.reason] || 'Could not verify that code.', 'error');
-      return;
-    }
-    // Code confirmed they own this inbox — now create the real account.
-    const cred = await auth.createUserWithEmailAndPassword(pendingEmail, pendingPass);
-    setStep(3);
   }catch(err){
     if((err.code||'').includes('email-already-in-use')){
       showBanner('That email already has an account — try signing in instead.', 'error');
@@ -150,23 +116,11 @@ document.getElementById('step2Btn').addEventListener('click', async ()=>{
       showBanner('Something went wrong: ' + err.message, 'error');
     }
   }finally{
-    btn.disabled=false; btn.textContent='Verify code';
+    btn.disabled=false; btn.textContent='Continue';
   }
 });
 
-document.getElementById('resendBtn').addEventListener('click', async ()=>{
-  const btn=document.getElementById('resendBtn');
-  btn.disabled=true;
-  try{
-    await requestOtp(pendingEmail, 'signup');
-    showBanner('New code sent.', 'success');
-  }catch(err){
-    showBanner('Could not resend: ' + err.message, 'error');
-  }
-  setTimeout(()=>btn.disabled=false, 20000);
-});
-
-/* ---- Step 3: username availability (live check) ---- */
+/* ---- Step 2: username availability (live check) ---- */
 let usernameCheckTimer=null;
 document.getElementById('username').addEventListener('input', (e)=>{
   const val = e.target.value.trim();
@@ -182,8 +136,8 @@ document.getElementById('username').addEventListener('input', (e)=>{
   }, 400);
 });
 
-/* ---- Step 3: submit ---- */
-document.getElementById('step3Btn').addEventListener('click', async ()=>{
+/* ---- Step 2: submit ---- */
+document.getElementById('step2Btn').addEventListener('click', async ()=>{
   clearBanner();
   const firstName = document.getElementById('firstName').value.trim();
   const lastName = document.getElementById('lastName').value.trim();
@@ -193,7 +147,7 @@ document.getElementById('step3Btn').addEventListener('click', async ()=>{
   if(!firstName || !lastName || !username){ showBanner('Fill in all fields.', 'error'); return; }
   if(confirmPass !== pendingPass){ showBanner('That password does not match what you entered in step 1.', 'error'); return; }
 
-  const btn=document.getElementById('step3Btn');
+  const btn=document.getElementById('step2Btn');
   btn.disabled=true; btn.textContent='Creating...';
   try{
     const free = await isUsernameAvailable(username);
