@@ -76,7 +76,7 @@ function showBanner(msg, kind){
   banner.innerHTML = `<div class="banner banner-${kind}">${escapeHtml(msg)}</div>`;
 }
 
-wirePasswordToggles();
+try{ wirePasswordToggles(); }catch(e){ console.error("password toggle setup failed:", e); }
 
 // If already signed in, skip straight to the dashboard.
 auth.onAuthStateChanged(user=>{ if(user) window.location.href='dashboard.html'; });
