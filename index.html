@@ -100,10 +100,9 @@ document.getElementById('loginForm').addEventListener('submit', async (e)=>{
       }
       email = doc.data().email;
     }
-    const persistence = document.getElementById('rememberMe').checked
-      ? firebase.auth.Auth.Persistence.LOCAL
-      : firebase.auth.Auth.Persistence.SESSION;
-    await auth.setPersistence(persistence);
+    // Always stay signed in across visits/reopens — sign-out is the only way
+    // to end a session now, via the Log Out option in Settings.
+    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     await auth.signInWithEmailAndPassword(email, pass);
     window.location.href = 'dashboard.html';
   }catch(err){

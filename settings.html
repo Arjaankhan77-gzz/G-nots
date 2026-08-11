@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings — G-Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink-bg: #1B1F2A; --ink-bg-2: #222739; --paper: #F6F1E4; --paper-dim: #ECE5D2;
+    --fg: #F6F1E4; --text-ink: #23201B; --text-dim: #8A8F9C;
+    --mustard: #D8A438; --teal: #3E7C74; --danger: #B3543F; --line: rgba(246,241,228,0.14);
+  }
+  [data-theme="light"]{
+    --ink-bg: #F7F4EC; --ink-bg-2: #EDE7D6; --paper: #FFFFFF; --paper-dim: #F3EFE2;
+    --fg: #23201B; --text-dim: #6B6558; --mustard: #C98A1E; --teal: #2F675F;
+    --danger: #A8432E; --line: rgba(35,32,27,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--ink-bg);color:var(--fg);font-family:'Inter',sans-serif;min-height:100vh;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;text-decoration:none;}
+
+  header{display:flex;align-items:center;justify-content:space-between;padding:20px 32px;border-bottom:1px solid var(--line);}
+  .brand{display:flex;align-items:baseline;gap:10px;}
+  .brand .mark{font-family:'Fraunces',serif;font-weight:700;font-size:22px;letter-spacing:-0.02em;}
+  .back-link{font-size:13px;color:var(--text-dim);display:flex;align-items:center;gap:6px;}
+  .back-link:hover{color:var(--mustard);}
+
+  .layout{display:grid;grid-template-columns:250px 1fr;max-width:920px;margin:0 auto;min-height:calc(100vh - 73px);}
+  nav.settings-nav{padding:32px 20px;border-right:1px solid var(--line);}
+  nav.settings-nav button{
+    display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;
+    color:var(--fg);opacity:.72;padding:10px 12px;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;
+    font-size:14px;margin-bottom:2px;
+  }
+  nav.settings-nav button.active{opacity:1;background:var(--ink-bg-2);}
+  nav.settings-nav button:hover{opacity:1;}
+  nav.settings-nav button.logout-item{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);color:var(--danger);opacity:1;}
+  nav.settings-nav button.logout-item:hover{background:rgba(179,84,63,0.12);}
+
+  main{padding:36px 40px;}
+  .panel{display:none;}
+  .panel.active{display:block;}
+  .panel h1{font-family:'Fraunces',serif;font-size:24px;margin:0 0 6px;}
+  .panel .sub{color:var(--text-dim);font-size:13px;margin:0 0 28px;}
+
+  .avatar-lg{width:64px;height:64px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;font-size:22px;margin-bottom:20px;}
+
+  .field{margin-bottom:18px;max-width:420px;}
+  .field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);margin-bottom:6px;}
+  .field input, .field textarea{width:100%;padding:10px 12px;border:1px solid var(--line);background:var(--paper-dim);color:var(--text-ink);border-radius:4px;font-size:14px;font-family:'Inter',sans-serif;}
+  .field input:disabled{opacity:.65;cursor:not-allowed;}
+  .field textarea{min-height:70px;resize:vertical;}
+  .primary-btn{padding:10px 20px;background:var(--mustard);color:#241c05;border:none;border-radius:4px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
+  .primary-btn:hover{filter:brightness(1.06);}
+  .primary-btn:disabled{opacity:.6;cursor:not-allowed;}
+
+  .theme-row{display:flex;gap:12px;max-width:420px;}
+  .theme-opt{flex:1;border:1px solid var(--line);padding:14px;border-radius:6px;cursor:pointer;text-align:center;font-size:13.5px;}
+  .theme-opt.selected{border-color:var(--teal);background:rgba(62,124,116,0.12);}
+
+  .blocked-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px;max-width:480px;}
+  .blocked-row button{background:none;border:1px solid var(--line);color:var(--fg);padding:5px 12px;border-radius:12px;cursor:pointer;font-size:12px;}
+
+  .danger-zone{border:1px solid rgba(179,84,63,0.4);background:rgba(179,84,63,0.08);border-radius:6px;padding:16px 18px;margin-top:28px;max-width:480px;}
+  .danger-zone p{font-size:12.5px;color:var(--text-dim);margin:0 0 12px;}
+  .btn-danger{background:none;border:1px solid var(--danger);color:var(--danger);padding:9px 16px;border-radius:4px;cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;}
+  .btn-ghost{background:none;border:1px solid var(--line);color:var(--fg);padding:9px 16px;border-radius:4px;cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;}
+
+  @media (max-width: 720px){
+    .layout{grid-template-columns:1fr;}
+    nav.settings-nav{border-right:none;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:4px;padding:16px 20px;}
+    nav.settings-nav button{width:auto;}
+    nav.settings-nav button.logout-item{margin-top:0;padding-top:10px;border-top:none;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><span class="mark">G-Notes</span></div>
+  <a class="back-link" href="dashboard.html">&larr; Back to notes</a>
+</header>
+
+<div class="layout">
+  <nav class="settings-nav">
+    <button class="stab active" data-stab="account">Account</button>
+    <button class="stab" data-stab="privacy">Privacy</button>
+    <button class="stab" data-stab="appearance">Appearance</button>
+    <button class="stab" data-stab="data">Your data</button>
+    <button class="logout-item" id="logoutBtn">Log out</button>
+  </nav>
+
+  <main>
+    <!-- Account -->
+    <div class="panel active" id="panel-account">
+      <h1>Account</h1>
+      <p class="sub">Your profile info.</p>
+      <div class="avatar-lg" id="avatarLg">?</div>
+      <div class="field">
+        <label>First name</label>
+        <input type="text" id="profFirstName">
+      </div>
+      <div class="field">
+        <label>Last name</label>
+        <input type="text" id="profLastName">
+      </div>
+      <div class="field">
+        <label>Bio</label>
+        <textarea id="profBio" placeholder="Say something about yourself" maxlength="200"></textarea>
+      </div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="profUsername" disabled>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="text" id="profEmail" disabled>
+      </div>
+      <button class="primary-btn" id="saveProfileBtn">Save changes</button>
+    </div>
+
+    <!-- Privacy -->
+    <div class="panel" id="panel-privacy">
+      <h1>Privacy</h1>
+      <p class="sub">Block someone from any of their notes (open the note → "Block this person"). Their notes stop showing up for you everywhere.</p>
+      <div id="blockedList"></div>
+    </div>
+
+    <!-- Appearance -->
+    <div class="panel" id="panel-appearance">
+      <h1>Appearance</h1>
+      <p class="sub">Pick how G-Notes looks on this device.</p>
+      <div class="theme-row">
+        <div class="theme-opt" data-theme-choice="light">☀️ Light</div>
+        <div class="theme-opt" data-theme-choice="dark">🌙 Dark</div>
+      </div>
+    </div>
+
+    <!-- Your data -->
+    <div class="panel" id="panel-data">
+      <h1>Your data</h1>
+      <p class="sub">Download or permanently remove what you've stored here.</p>
+      <button class="btn-ghost" id="exportDataBtn">Export my notes (.json)</button>
+
+      <div class="danger-zone">
+        <label style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--danger);">Danger zone</label>
+        <p style="margin-top:8px;">Deletes your notes, your profile, and your sign-in — this can't be undone.</p>
+        <button class="btn-danger" id="deleteAccountBtn">Delete my account</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script>
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
+
+let currentUser=null, currentProfile=null;
+
+/* ---- theme ---- */
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('catalog-theme', theme);
+  document.querySelectorAll('.theme-opt').forEach(el=>{
+    el.classList.toggle('selected', el.dataset.themeChoice === theme);
+  });
+}
+applyTheme(localStorage.getItem('catalog-theme') || 'dark');
+document.querySelectorAll('.theme-opt').forEach(el=>{
+  el.addEventListener('click', ()=>applyTheme(el.dataset.themeChoice));
+});
+
+/* ---- tabs ---- */
+document.querySelectorAll('.stab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.stab').forEach(b=>b.classList.toggle('active', b===btn));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', p.id==='panel-'+btn.dataset.stab));
+  });
+});
+
+document.getElementById('logoutBtn').addEventListener('click', ()=>auth.signOut());
+
+/* ---- load profile ---- */
+auth.onAuthStateChanged(async user=>{
+  if(!user){ window.location.href='index.html'; return; }
+  currentUser = user;
+  try{
+    const snap = await db.collection('users').doc(user.uid).get();
+    currentProfile = snap.exists ? snap.data() : {};
+  }catch(e){ currentProfile = {}; }
+
+  document.getElementById('profFirstName').value = currentProfile.firstName || '';
+  document.getElementById('profLastName').value = currentProfile.lastName || '';
+  document.getElementById('profBio').value = currentProfile.bio || '';
+  document.getElementById('profUsername').value = currentProfile.username ? '@'+currentProfile.username : '';
+  document.getElementById('profEmail').value = user.email;
+  const initials = ((currentProfile.firstName||'?')[0] + (currentProfile.lastName||'')[0]).toUpperCase();
+  document.getElementById('avatarLg').textContent = initials;
+
+  renderBlockedList();
+});
+
+document.getElementById('saveProfileBtn').addEventListener('click', async ()=>{
+  const firstName = document.getElementById('profFirstName').value.trim();
+  const lastName = document.getElementById('profLastName').value.trim();
+  const bio = document.getElementById('profBio').value.trim();
+  if(!firstName || !lastName){ alert('First and last name can\'t be empty.'); return; }
+  const btn = document.getElementById('saveProfileBtn');
+  btn.disabled=true; btn.textContent='Saving...';
+  try{
+    await db.collection('users').doc(currentUser.uid).update({firstName, lastName, bio});
+    currentProfile.firstName=firstName; currentProfile.lastName=lastName; currentProfile.bio=bio;
+    document.getElementById('avatarLg').textContent = ((firstName||'?')[0]+(lastName||'')[0]).toUpperCase();
+  }catch(err){
+    alert('Could not save: ' + err.message);
+  }finally{
+    btn.disabled=false; btn.textContent='Save changes';
+  }
+});
+
+async function renderBlockedList(){
+  const box = document.getElementById('blockedList');
+  const blocked = currentProfile.blockedEmails || [];
+  if(blocked.length===0){
+    box.innerHTML = `<p style="font-size:13px;color:var(--text-dim);">You haven't blocked anyone.</p>`;
+    return;
+  }
+  box.innerHTML = blocked.map(email=>`
+    <div class="blocked-row">
+      <span class="mono">${escapeHtml(email)}</span>
+      <button data-unblock="${escapeHtml(email)}">Unblock</button>
+    </div>
+  `).join('');
+  box.querySelectorAll('[data-unblock]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const email = btn.dataset.unblock;
+      try{
+        await db.collection('users').doc(currentUser.uid).update({
+          blockedEmails: firebase.firestore.FieldValue.arrayRemove(email)
+        });
+        currentProfile.blockedEmails = (currentProfile.blockedEmails||[]).filter(e=>e!==email);
+        renderBlockedList();
+      }catch(err){
+        alert('Could not unblock: ' + err.message);
+      }
+    });
+  });
+}
+
+document.getElementById('exportDataBtn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('exportDataBtn');
+  btn.disabled=true; btn.textContent='Exporting...';
+  try{
+    const snap = await db.collection('notes').where('ownerUid','==',currentUser.uid).get();
+    const notes = [];
+    snap.forEach(doc=>notes.push({id:doc.id, ...doc.data()}));
+    const blob = new Blob([JSON.stringify(notes, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'my-notes-export.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }catch(err){
+    alert('Could not export: ' + err.message);
+  }finally{
+    btn.disabled=false; btn.textContent='Export my notes (.json)';
+  }
+});
+
+document.getElementById('deleteAccountBtn').addEventListener('click', async ()=>{
+  if(!confirm('This permanently deletes your notes, profile, and sign-in. Continue?')) return;
+  if(prompt('Type DELETE to confirm.') !== 'DELETE') return;
+  const btn = document.getElementById('deleteAccountBtn');
+  btn.disabled=true; btn.textContent='Deleting...';
+  try{
+    const snap = await db.collection('notes').where('ownerUid','==',currentUser.uid).get();
+    await Promise.all(snap.docs.map(doc=>doc.ref.delete()));
+    if(currentProfile.username){
+      await db.collection('usernames').doc(currentProfile.username).delete().catch(()=>{});
+    }
+    await db.collection('users').doc(currentUser.uid).delete();
+    await currentUser.delete();
+    window.location.href = 'index.html';
+  }catch(err){
+    if((err.code||'').includes('requires-recent-login')){
+      alert('For security, please sign out, sign back in, then try deleting your account again right away.');
+    } else {
+      alert('Could not delete account: ' + err.message);
+    }
+    btn.disabled=false; btn.textContent='Delete my account';
+  }
+});
+</script>
+</body>
+</html>
