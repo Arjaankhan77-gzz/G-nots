@@ -18,13 +18,17 @@ service cloud.firestore {
     }
 
     // ---- Usernames: doc ID *is* the username, so this enforces uniqueness.
-    // A write to an existing doc is an "update", which is blocked below —
+    // A write to an existing doc is an "update", which stays blocked below —
     // so once a name is taken, nobody (including its owner) can be reassigned to it.
+    // Delete is allowed only by the person who owns that reservation, so
+    // deleting your account frees your username back up for others.
     match /usernames/{username} {
       allow read: if true; // needed to check availability pre-signup and to sign in by username
       allow create: if request.auth != null
                     && request.resource.data.uid == request.auth.uid;
-      allow update, delete: if false;
+      allow delete: if request.auth != null
+                    && request.auth.uid == resource.data.uid;
+      allow update: if false;
     }
 
     // ---- User profiles: only the owner can read/write their own ----

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Catalog — your notes, shared on your terms</title>
+<title>G-Notes — your notes, shared on your terms</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -12,6 +12,7 @@
     --ink-bg-2: #222739;
     --paper: #F6F1E4;
     --paper-dim: #ECE5D2;
+    --fg: #F6F1E4;
     --text-ink: #23201B;
     --text-dim: #8A8F9C;
     --mustard: #D8A438;
@@ -19,8 +20,20 @@
     --danger: #B3543F;
     --line: rgba(246,241,228,0.14);
   }
+  [data-theme="light"]{
+    --ink-bg: #F7F4EC;
+    --ink-bg-2: #EDE7D6;
+    --paper: #FFFFFF;
+    --paper-dim: #F3EFE2;
+    --fg: #23201B;
+    --text-dim: #6B6558;
+    --mustard: #C98A1E;
+    --teal: #2F675F;
+    --danger: #A8432E;
+    --line: rgba(35,32,27,0.14);
+  }
   *{box-sizing:border-box;}
-  body{margin:0;background:var(--ink-bg);color:var(--paper);font-family:'Inter',sans-serif;min-height:100vh;}
+  body{margin:0;background:var(--ink-bg);color:var(--fg);font-family:'Inter',sans-serif;min-height:100vh;}
   .mono{font-family:'IBM Plex Mono',monospace;}
   .display{font-family:'Fraunces',serif;}
   a{color:inherit;}
@@ -30,9 +43,12 @@
   .brand{display:flex;align-items:baseline;gap:10px;}
   .brand .mark{font-family:'Fraunces',serif;font-weight:700;font-size:22px;letter-spacing:-0.02em;}
   .brand .tag{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.12em;}
-  .who{display:flex;align-items:center;gap:14px;font-size:13px;color:var(--text-dim);}
-  .who button{background:transparent;border:1px solid var(--line);color:var(--paper);padding:7px 14px;border-radius:3px;cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;}
+  .who{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-dim);}
+  .who button{background:transparent;border:1px solid var(--line);color:var(--fg);padding:7px 14px;border-radius:3px;cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;}
   .who button:hover{border-color:var(--mustard);color:var(--mustard);}
+  .icon-btn{background:transparent;border:1px solid var(--line);color:var(--fg);width:34px;height:34px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .icon-btn:hover{border-color:var(--mustard);color:var(--mustard);}
+  .avatar-btn{width:34px;height:34px;border-radius:50%;background:var(--teal);color:#fff;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-weight:700;font-size:12.5px;display:flex;align-items:center;justify-content:center;}
 
   /* ---- auth screen ---- */
   .auth-wrap{min-height:calc(100vh - 73px);display:flex;align-items:center;justify-content:center;padding:40px 20px;}
@@ -54,7 +70,7 @@
   .app{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 73px);}
   nav.side{border-right:1px solid var(--line);padding:26px 22px;}
   .side h2{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--text-dim);margin:0 0 14px;}
-  .side .tab{display:block;width:100%;text-align:left;background:none;border:none;color:var(--paper);opacity:.7;padding:9px 10px;border-radius:3px;cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;margin-bottom:2px;}
+  .side .tab{display:block;width:100%;text-align:left;background:none;border:none;color:var(--fg);opacity:.7;padding:9px 10px;border-radius:3px;cursor:pointer;font-family:'Inter',sans-serif;font-size:14px;margin-bottom:2px;}
   .side .tab.active{opacity:1;background:var(--ink-bg-2);}
   .side .tab:hover{opacity:1;}
   .new-note-btn{width:100%;margin-top:20px;padding:10px;background:var(--mustard);color:#241c05;border:none;border-radius:3px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;font-size:13.5px;}
@@ -100,6 +116,21 @@
   .view-body{white-space:pre-wrap;font-size:14.5px;line-height:1.6;margin-top:6px;}
   .view-meta{font-size:12px;color:#7a7364;margin-top:18px;padding-top:12px;border-top:1px dashed #d8d0b8;}
 
+  /* ---- profile modal ---- */
+  .profile-tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid #d8d0b8;}
+  .profile-tabs button{background:none;border:none;padding:9px 4px;margin-right:16px;cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;color:#8a8371;border-bottom:2px solid transparent;}
+  .profile-tabs button.active{color:var(--text-ink);border-bottom-color:var(--teal);font-weight:600;}
+  .profile-section{display:none;}
+  .profile-section.active{display:block;}
+  .profile-section textarea{width:100%;min-height:70px;padding:10px 12px;border:1px solid #d8d0b8;background:#fffdf7;border-radius:2px;font-family:'Inter',sans-serif;font-size:13.5px;resize:vertical;}
+  .theme-row{display:flex;gap:10px;margin-top:6px;}
+  .theme-opt{flex:1;border:1px solid #d8d0b8;padding:10px;border-radius:3px;cursor:pointer;text-align:center;font-size:13px;}
+  .theme-opt.selected{border-color:var(--teal);background:#e6f0ee;}
+  .blocked-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee4cd;font-size:13.5px;}
+  .blocked-row button{background:none;border:1px solid #d8d0b8;padding:4px 10px;border-radius:12px;cursor:pointer;font-size:12px;}
+  .danger-zone{border:1px solid #f0d3c8;background:#fdf5f1;border-radius:3px;padding:14px 16px;margin-top:8px;}
+  .danger-zone p{font-size:12.5px;color:#8a5a45;margin:0 0 10px;}
+
   @media (max-width: 760px){
     .app{grid-template-columns:1fr;}
     nav.side{border-right:none;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:16px 20px;}
@@ -114,7 +145,7 @@
 
 <header>
   <div class="brand">
-    <span class="mark">Catalog</span>
+    <span class="mark">G-Notes</span>
     <span class="tag">notes, filed and shared</span>
   </div>
   <div class="who" id="whoBar"></div>
@@ -172,8 +203,68 @@
     <div class="view-body" id="viewBody"></div>
     <div class="view-meta mono" id="viewMeta"></div>
     <div class="modal-actions">
+      <button class="btn-danger" id="blockFromViewBtn" style="display:none;">Block this person</button>
       <button class="btn-ghost" id="closeViewBtn">Close</button>
       <button class="primary-btn" id="editFromViewBtn" style="width:auto;padding:9px 18px;display:none;">Edit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Profile & privacy modal -->
+<div class="modal-bg" id="profileBg" style="display:none;">
+  <div class="modal">
+    <h2>Profile & privacy</h2>
+    <div class="profile-tabs">
+      <button class="ptab active" data-ptab="profile">Profile</button>
+      <button class="ptab" data-ptab="appearance">Appearance</button>
+      <button class="ptab" data-ptab="privacy">Privacy</button>
+      <button class="ptab" data-ptab="data">Your data</button>
+    </div>
+
+    <div class="profile-section active" id="psec-profile">
+      <div class="field">
+        <label>First name</label>
+        <input type="text" id="profFirstName">
+      </div>
+      <div class="field">
+        <label>Last name</label>
+        <input type="text" id="profLastName">
+      </div>
+      <div class="field">
+        <label>Bio</label>
+        <textarea id="profBio" placeholder="Say something about yourself" maxlength="200"></textarea>
+      </div>
+      <button class="primary-btn" id="saveProfileBtn" style="width:auto;padding:9px 18px;">Save changes</button>
+    </div>
+
+    <div class="profile-section" id="psec-appearance">
+      <label style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#7a7364;">Theme</label>
+      <div class="theme-row">
+        <div class="theme-opt" data-theme-choice="light">☀️ Light</div>
+        <div class="theme-opt" data-theme-choice="dark">🌙 Dark</div>
+      </div>
+    </div>
+
+    <div class="profile-section" id="psec-privacy">
+      <label style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#7a7364;">Blocked people</label>
+      <p style="font-size:12.5px;color:#8a8371;margin:6px 0 4px;">Block someone from any of their notes — open the note and choose "Block this person." Blocked people's notes stop showing up for you.</p>
+      <div id="blockedList" style="margin-top:8px;"></div>
+    </div>
+
+    <div class="profile-section" id="psec-data">
+      <label style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#7a7364;">Export</label>
+      <p style="font-size:12.5px;color:#8a8371;margin:6px 0 12px;">Download every note you own as a single JSON file.</p>
+      <button class="btn-ghost" id="exportDataBtn">Export my notes</button>
+
+      <div class="danger-zone" style="margin-top:24px;">
+        <label style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#8a5a45;">Danger zone</label>
+        <p style="margin-top:8px;">Deletes your notes, your profile, and your sign-in — this can't be undone.</p>
+        <button class="btn-danger" id="deleteAccountBtn" style="margin-right:0;">Delete my account</button>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-ghost" id="closeProfileBtn">Close</button>
     </div>
   </div>
 </div>
@@ -186,23 +277,44 @@
 <script>
 const appScreen=document.getElementById('appScreen');
 let currentUser = null;
+let currentProfile = null;
 let activeTab = 'mine';
 let currentEditId = null;
 let shareList = [];
 let unsub = null;
 
+/* ---------- Theme ---------- */
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('catalog-theme', theme);
+  document.querySelectorAll('.theme-opt').forEach(el=>{
+    el.classList.toggle('selected', el.dataset.themeChoice === theme);
+  });
+}
+applyTheme(localStorage.getItem('catalog-theme') || 'dark');
+document.querySelectorAll('.theme-opt').forEach(el=>{
+  el.addEventListener('click', ()=>applyTheme(el.dataset.themeChoice));
+});
+
 auth.onAuthStateChanged(async user=>{
   currentUser = user;
   if(user){
     appScreen.style.display='grid';
-    let label = user.email;
+    let profile = null;
     try{
-      const profile = await db.collection('users').doc(user.uid).get();
-      if(profile.exists) label = '@' + profile.data().username;
+      const snap = await db.collection('users').doc(user.uid).get();
+      if(snap.exists) profile = snap.data();
     }catch(e){}
-    document.getElementById('whoBar').innerHTML =
-      `<span class="mono">${escapeHtml(label)}</span><button id="signOutBtn">Sign out</button>`;
+    currentProfile = profile || {};
+    const label = profile ? '@' + profile.username : user.email;
+    const initials = profile ? ((profile.firstName||'?')[0] + (profile.lastName||'')[0]).toUpperCase() : '?';
+    document.getElementById('whoBar').innerHTML = `
+      <button class="avatar-btn" id="avatarBtn" title="Profile & privacy">${escapeHtml(initials)}</button>
+      <span class="mono">${escapeHtml(label)}</span>
+      <button id="signOutBtn">Sign out</button>
+    `;
     document.getElementById('signOutBtn').addEventListener('click', ()=>auth.signOut());
+    document.getElementById('avatarBtn').addEventListener('click', openProfileModal);
     loadTab('mine');
   } else {
     if(unsub){ unsub(); unsub=null; }
@@ -241,8 +353,13 @@ function loadTab(tab){
   }
 
   unsub = query.onSnapshot(snap=>{
+    const blocked = (currentProfile && currentProfile.blockedEmails) || [];
     const notes=[];
-    snap.forEach(doc=>notes.push({id:doc.id,...doc.data()}));
+    snap.forEach(doc=>{
+      const data = doc.data();
+      if(blocked.includes(data.ownerEmail)) return; // hide blocked people's notes
+      notes.push({id:doc.id,...data});
+    });
     notes.sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));
     renderGrid(notes);
   }, err=>{
@@ -284,15 +401,33 @@ function openView(note){
   document.getElementById('viewMeta').textContent =
     `${note.ownerEmail} · ${note.visibility}${shared}`;
   const editBtn = document.getElementById('editFromViewBtn');
+  const blockBtn = document.getElementById('blockFromViewBtn');
   if(note.ownerUid===currentUser.uid){
     editBtn.style.display='inline-block';
     editBtn.onclick = ()=>{ viewBg.style.display='none'; openEditor(note); };
+    blockBtn.style.display='none';
   } else {
     editBtn.style.display='none';
+    blockBtn.style.display='inline-block';
+    blockBtn.onclick = ()=>blockPerson(note.ownerUid, note.ownerEmail);
   }
   viewBg.style.display='flex';
 }
 document.getElementById('closeViewBtn').addEventListener('click', ()=>viewBg.style.display='none');
+
+async function blockPerson(uid, email){
+  if(!confirm(`Block ${email}? Their notes will stop showing up for you.`)) return;
+  try{
+    await db.collection('users').doc(currentUser.uid).update({
+      blockedEmails: firebase.firestore.FieldValue.arrayUnion(email)
+    });
+    currentProfile.blockedEmails = [...(currentProfile.blockedEmails||[]), email];
+    viewBg.style.display='none';
+    loadTab(activeTab);
+  }catch(err){
+    alert('Could not block: ' + err.message);
+  }
+}
 
 /* ---------- Editor modal ---------- */
 const editorBg=document.getElementById('editorBg');
@@ -385,6 +520,124 @@ document.getElementById('deleteNoteBtn').addEventListener('click', async ()=>{
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
 }
+
+/* ---------- Profile & privacy modal ---------- */
+const profileBg=document.getElementById('profileBg');
+
+function openProfileModal(){
+  document.getElementById('profFirstName').value = currentProfile.firstName || '';
+  document.getElementById('profLastName').value = currentProfile.lastName || '';
+  document.getElementById('profBio').value = currentProfile.bio || '';
+  applyTheme(localStorage.getItem('catalog-theme') || 'dark');
+  renderBlockedList();
+  switchPTab('profile');
+  profileBg.style.display='flex';
+}
+document.getElementById('closeProfileBtn').addEventListener('click', ()=>profileBg.style.display='none');
+
+function switchPTab(name){
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.toggle('active', b.dataset.ptab===name));
+  document.querySelectorAll('.profile-section').forEach(s=>s.classList.toggle('active', s.id==='psec-'+name));
+}
+document.querySelectorAll('.ptab').forEach(b=>{
+  b.addEventListener('click', ()=>switchPTab(b.dataset.ptab));
+});
+
+document.getElementById('saveProfileBtn').addEventListener('click', async ()=>{
+  const firstName = document.getElementById('profFirstName').value.trim();
+  const lastName = document.getElementById('profLastName').value.trim();
+  const bio = document.getElementById('profBio').value.trim();
+  if(!firstName || !lastName){ alert('First and last name can\'t be empty.'); return; }
+  const btn = document.getElementById('saveProfileBtn');
+  btn.disabled=true; btn.textContent='Saving...';
+  try{
+    await db.collection('users').doc(currentUser.uid).update({firstName, lastName, bio});
+    currentProfile.firstName = firstName; currentProfile.lastName = lastName; currentProfile.bio = bio;
+    const initials = ((firstName||'?')[0] + (lastName||'')[0]).toUpperCase();
+    const avatarBtn = document.getElementById('avatarBtn');
+    if(avatarBtn) avatarBtn.textContent = initials;
+  }catch(err){
+    alert('Could not save: ' + err.message);
+  }finally{
+    btn.disabled=false; btn.textContent='Save changes';
+  }
+});
+
+async function renderBlockedList(){
+  const box = document.getElementById('blockedList');
+  const blocked = currentProfile.blockedEmails || [];
+  if(blocked.length===0){
+    box.innerHTML = `<p style="font-size:12.5px;color:#8a8371;">You haven't blocked anyone.</p>`;
+    return;
+  }
+  box.innerHTML = blocked.map(email=>`
+    <div class="blocked-row" data-email="${escapeHtml(email)}">
+      <span class="mono">${escapeHtml(email)}</span>
+      <button data-unblock="${escapeHtml(email)}">Unblock</button>
+    </div>
+  `).join('');
+  box.querySelectorAll('[data-unblock]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const email = btn.dataset.unblock;
+      try{
+        await db.collection('users').doc(currentUser.uid).update({
+          blockedEmails: firebase.firestore.FieldValue.arrayRemove(email)
+        });
+        currentProfile.blockedEmails = (currentProfile.blockedEmails||[]).filter(e=>e!==email);
+        renderBlockedList();
+        loadTab(activeTab);
+      }catch(err){
+        alert('Could not unblock: ' + err.message);
+      }
+    });
+  });
+}
+
+document.getElementById('exportDataBtn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('exportDataBtn');
+  btn.disabled=true; btn.textContent='Exporting...';
+  try{
+    const snap = await db.collection('notes').where('ownerUid','==',currentUser.uid).get();
+    const notes = [];
+    snap.forEach(doc=>notes.push({id:doc.id, ...doc.data()}));
+    const blob = new Blob([JSON.stringify(notes, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'my-notes-export.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }catch(err){
+    alert('Could not export: ' + err.message);
+  }finally{
+    btn.disabled=false; btn.textContent='Export my notes';
+  }
+});
+
+document.getElementById('deleteAccountBtn').addEventListener('click', async ()=>{
+  if(!confirm('This permanently deletes your notes, profile, and sign-in. Continue?')) return;
+  if(prompt('Type DELETE to confirm.') !== 'DELETE') return;
+  const btn = document.getElementById('deleteAccountBtn');
+  btn.disabled=true; btn.textContent='Deleting...';
+  try{
+    const snap = await db.collection('notes').where('ownerUid','==',currentUser.uid).get();
+    const batchDeletes = [];
+    snap.forEach(doc=>batchDeletes.push(doc.ref.delete()));
+    await Promise.all(batchDeletes);
+    if(currentProfile.username){
+      await db.collection('usernames').doc(currentProfile.username).delete().catch(()=>{});
+    }
+    await db.collection('users').doc(currentUser.uid).delete();
+    await currentUser.delete();
+    window.location.href = 'index.html';
+  }catch(err){
+    if((err.code||'').includes('requires-recent-login')){
+      alert('For security, please sign out, sign back in, then try deleting your account again right away.');
+    } else {
+      alert('Could not delete account: ' + err.message);
+    }
+    btn.disabled=false; btn.textContent='Delete my account';
+  }
+});
 </script>
 </body>
 </html>
